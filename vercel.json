@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "bash scripts/vercel-build.sh",
+  "buildCommand": "node scripts/vercel-build.js",
   "outputDirectory": "frontend/dist",
   "functions": {
     "api/index.js": {
