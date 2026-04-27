@@ -1,0 +1,17 @@
+{
+  "name": "capstone-project",
+  "version": "1.0.0",
+  "description": "Village API SaaS Platform",
+  "private": true,
+  "scripts": {
+    "backend": "cd backend && npm install && npm run dev",
+    "frontend": "cd frontend && npm install && npm run dev",
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "db:setup": "cd backend && npx prisma db push && npx prisma generate",
+    "import:data": "cd data-import && python import_all.py"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

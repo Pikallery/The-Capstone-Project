@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact Form Demo — Village API</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Segoe UI', system-ui, sans-serif; }
+    .autocomplete-dropdown { max-height: 240px; overflow-y: auto; }
+    .autocomplete-item:hover { background: #eff6ff; }
+    .fade-in { animation: fadeIn 0.15s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+    .filled { background: #f0fdf4; border-color: #22c55e; }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-900 to-indigo-800 flex items-center justify-center p-4">
+
+<div class="w-full max-w-2xl">
+  <!-- Header -->
+  <div class="text-center mb-6">
+    <div class="inline-flex items-center gap-2 bg-white/10 text-white px-4 py-2 rounded-full text-sm mb-4">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      Powered by Village API — Live Demo
+    </div>
+    <h1 class="text-3xl font-bold text-white mb-2">Address Autocomplete Demo</h1>
+    <p class="text-blue-200">Start typing any village name to see the API in action</p>
+  </div>
+
+  <!-- Form Card -->
+  <div class="bg-white rounded-2xl shadow-2xl p-8">
+    <form id="contactForm" onsubmit="handleSubmit(event)" class="space-y-5">
+
+      <!-- Name + Email -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Full Name *</label>
+          <input type="text" name="name" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition" placeholder="Ravi Kumar" />
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Email *</label>
+          <input type="email" name="email" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition" placeholder="ravi@example.com" />
+        </div>
+      </div>
+
+      <!-- Phone -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Phone Number</label>
+        <input type="tel" name="phone" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition" placeholder="+91 98765 43210" />
+      </div>
+
+      <!-- Village search (the demo centerpiece) -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">
+          Village / Area *
+          <span class="ml-1 text-xs font-normal text-blue-600">(Start typing to search from 600,000+ villages)</span>
+        </label>
+        <div class="relative">
+          <input
+            type="text"
+            id="villageSearch"
+            required
+            autocomplete="off"
+            class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition pr-10"
+            placeholder="e.g. Manibeli, Andheri, Banjara Hills…"
+            oninput="onVillageInput(this.value)"
+            onfocus="if(this.value.length >= 2) showDropdown()"
+          />
+          <div id="searchSpinner" class="hidden absolute right-3 top-1/2 -translate-y-1/2">
+            <svg class="animate-spin h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+          </div>
+
+          <!-- Dropdown -->
+          <div id="dropdown" class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg autocomplete-dropdown fade-in">
+            <div id="dropdownItems"></div>
+          </div>
+        </div>
+        <input type="hidden" id="villageId" name="villageId" />
+      </div>
+
+      <!-- Auto-filled address fields -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Sub-District (Block)</label>
+          <input type="text" id="subDistrict" name="subDistrict" readonly class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50 text-gray-500" placeholder="Auto-filled" />
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">District</label>
+          <input type="text" id="district" name="district" readonly class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50 text-gray-500" placeholder="Auto-filled" />
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">State</label>
+          <input type="text" id="state" name="state" readonly class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50 text-gray-500" placeholder="Auto-filled" />
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Country</label>
+          <input type="text" id="country" name="country" readonly value="India" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50 text-gray-500 filled" />
+        </div>
+      </div>
+
+      <!-- Message -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Message</label>
+        <textarea name="message" rows="3" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition resize-none" placeholder="Your message here…"></textarea>
+      </div>
+
+      <!-- Submit -->
+      <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 active:bg-blue-800 transition-all duration-150 flex items-center justify-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Submit
+      </button>
+    </form>
+
+    <!-- Success message -->
+    <div id="successMsg" class="hidden mt-6 p-5 bg-green-50 border border-green-200 rounded-xl text-center">
+      <div class="text-green-600 text-4xl mb-2">✓</div>
+      <h3 class="font-bold text-green-800 text-lg">Form Submitted!</h3>
+      <p class="text-green-700 text-sm mt-1" id="submittedAddress"></p>
+      <button onclick="resetForm()" class="mt-4 text-sm text-blue-600 underline hover:no-underline">Submit another response</button>
+    </div>
+
+    <!-- API info -->
+    <div class="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-100">
+      <p class="text-xs text-gray-500 font-semibold uppercase tracking-wide mb-2">Live API calls</p>
+      <div id="apiLog" class="space-y-1 text-xs font-mono text-gray-400 max-h-28 overflow-y-auto">
+        <div class="text-gray-300 italic">Waiting for search input…</div>
+      </div>
+    </div>
+  </div>
+
+  <p class="text-center text-blue-200 text-xs mt-4">
+    This demo uses the Village API — <a href="#" class="underline hover:text-white">villageapi.com</a>
+  </p>
+</div>
+
+<script>
+  const API_URL = (window.VITE_API_URL || 'http://localhost:3000') + '/api/v1';
+  const API_KEY = window.VITE_API_KEY || 'demo_key';
+
+  let debounceTimer = null;
+  let selectedVillage = null;
+
+  function logApi(msg) {
+    const log = document.getElementById('apiLog');
+    const item = document.createElement('div');
+    item.textContent = new Date().toLocaleTimeString() + ' → ' + msg;
+    log.prepend(item);
+    if (log.children.length > 8) log.lastChild.remove();
+  }
+
+  async function onVillageInput(q) {
+    clearTimeout(debounceTimer);
+    if (q.length < 2) { hideDropdown(); return; }
+
+    debounceTimer = setTimeout(async () => {
+      document.getElementById('searchSpinner').classList.remove('hidden');
+      try {
+        const t0 = Date.now();
+        const resp = await fetch(`${API_URL}/autocomplete?q=${encodeURIComponent(q)}&limit=8`, {
+          headers: { 'X-API-Key': API_KEY }
+        });
+        const data = await resp.json();
+        const elapsed = Date.now() - t0;
+        logApi(`GET /autocomplete?q=${q} → ${resp.status} (${elapsed}ms, ${data.count || 0} results)`);
+        renderDropdown(data.data || []);
+      } catch (err) {
+        logApi(`ERROR: ${err.message}`);
+        renderDropdown([]);
+      } finally {
+        document.getElementById('searchSpinner').classList.add('hidden');
+      }
+    }, 280);
+  }
+
+  function renderDropdown(items) {
+    const container = document.getElementById('dropdownItems');
+    if (!items.length) {
+      container.innerHTML = '<div class="px-4 py-3 text-sm text-gray-400">No results found</div>';
+      showDropdown();
+      return;
+    }
+
+    container.innerHTML = items.map((item, i) => `
+      <button type="button"
+        class="autocomplete-item w-full text-left px-4 py-3 border-b border-gray-50 last:border-0 transition"
+        onclick="selectVillage(${JSON.stringify(item).replace(/"/g, '&quot;')})">
+        <div class="font-medium text-gray-900 text-sm">${item.label}</div>
+        <div class="text-xs text-gray-400 mt-0.5">${item.hierarchy?.subDistrict || ''}, ${item.hierarchy?.district || ''}, ${item.hierarchy?.state || ''}</div>
+      </button>
+    `).join('');
+
+    showDropdown();
+  }
+
+  function selectVillage(item) {
+    selectedVillage = item;
+    const h = item.hierarchy || {};
+
+    document.getElementById('villageSearch').value = item.label;
+    document.getElementById('villageId').value = item.value;
+    document.getElementById('subDistrict').value = h.subDistrict || '';
+    document.getElementById('district').value = h.district || '';
+    document.getElementById('state').value = h.state || '';
+    document.getElementById('country').value = h.country || 'India';
+
+    // Visual feedback
+    ['subDistrict', 'district', 'state', 'country'].forEach(id => {
+      document.getElementById(id).classList.add('filled');
+    });
+
+    hideDropdown();
+    logApi(`Selected: ${item.fullAddress}`);
+  }
+
+  function showDropdown() { document.getElementById('dropdown').classList.remove('hidden'); }
+  function hideDropdown() { document.getElementById('dropdown').classList.add('hidden'); }
+
+  // Close dropdown on outside click
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#villageSearch') && !e.target.closest('#dropdown')) hideDropdown();
+  });
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    if (!selectedVillage) {
+      alert('Please select a village from the dropdown.');
+      return;
+    }
+    document.getElementById('contactForm').classList.add('hidden');
+    document.getElementById('successMsg').classList.remove('hidden');
+    document.getElementById('submittedAddress').textContent = selectedVillage.fullAddress;
+    logApi('Form submitted with address: ' + selectedVillage.fullAddress);
+  }
+
+  function resetForm() {
+    selectedVillage = null;
+    document.getElementById('contactForm').reset();
+    document.getElementById('contactForm').classList.remove('hidden');
+    document.getElementById('successMsg').classList.add('hidden');
+    ['subDistrict', 'district', 'state', 'country'].forEach(id => {
+      document.getElementById(id).classList.remove('filled');
+    });
+  }
+</script>
+</body>
+</html>

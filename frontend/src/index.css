@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-slate-100 font-sans antialiased transition-colors duration-200;
+  }
+  * { @apply transition-colors duration-150; }
+  /* Disable transition on SVG/circuit elements for 60fps */
+  svg, path, circle { transition: none !important; }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed;
+    transition: background-color 100ms ease, box-shadow 100ms ease, transform 80ms ease;
+  }
+  .btn:active { transform: scale(0.97); }
+
+  .btn-primary {
+    @apply btn bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-900;
+  }
+  .btn-secondary {
+    @apply btn bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 border border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700;
+  }
+  .btn-danger {
+    @apply btn bg-danger-500 text-white hover:bg-danger-700;
+  }
+
+  .card {
+    @apply bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm;
+  }
+
+  .input {
+    @apply w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm
+           bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100
+           placeholder-gray-400 dark:placeholder-slate-500
+           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  /* Notification panel */
+  .notif-panel {
+    @apply absolute right-0 top-full mt-2 w-80 card shadow-xl z-50 overflow-hidden;
+    animation: slideDown 0.22s cubic-bezier(0.16,1,0.3,1) both;
+  }
+}
