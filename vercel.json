@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "cd frontend && npm install && npm run build && cd ../backend && npm install && npx prisma generate",
+  "buildCommand": "bash scripts/vercel-build.sh",
   "outputDirectory": "frontend/dist",
   "functions": {
     "api/index.js": {
