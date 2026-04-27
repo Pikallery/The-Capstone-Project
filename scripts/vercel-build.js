@@ -4,16 +4,19 @@ const path = require('path');
 const root = path.resolve(__dirname, '..');
 
 function run(cmd, cwd) {
-  console.log(`\n> ${cmd}  (in ${path.relative(root, cwd) || '.'})`);
+  console.log(`\n> ${cmd}  (in ./${path.relative(root, cwd) || '.'})`);
   execSync(cmd, { cwd, stdio: 'inherit' });
 }
 
-console.log('=== Building frontend ===');
-run('npm install', path.join(root, 'frontend'));
+console.log('Node:', process.version);
+console.log('npm:', execSync('npm --version').toString().trim());
+
+console.log('\n=== Building frontend ===');
+run('npm install --legacy-peer-deps', path.join(root, 'frontend'));
 run('npm run build', path.join(root, 'frontend'));
 
 console.log('\n=== Setting up backend ===');
-run('npm install', path.join(root, 'backend'));
+run('npm install --legacy-peer-deps', path.join(root, 'backend'));
 run('npx prisma generate', path.join(root, 'backend'));
 
 console.log('\n=== Build complete ===');
