@@ -17,7 +17,8 @@ run('npm install --include=dev --legacy-peer-deps', path.join(root, 'frontend'))
 run('npm run build', path.join(root, 'frontend'));
 
 console.log('\n=== Setting up backend ===');
-run('npm install --legacy-peer-deps', path.join(root, 'backend'));
+// --include=dev ensures prisma CLI (devDep) is installed so npx uses local v5, not latest v7
+run('npm install --include=dev --legacy-peer-deps', path.join(root, 'backend'));
 run('npx prisma generate', path.join(root, 'backend'));
 
 console.log('\n=== Build complete ===');
